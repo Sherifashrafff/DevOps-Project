@@ -1,9 +1,9 @@
 ---
-- name: Install prerequisite packages
+- name: Install prerequisite packages (Amazon Linux 2)
   yum:
     name:
       - yum-utils
-      - iproute-tc
+      - iproute
       - socat
       - conntrack
       - curl
@@ -19,10 +19,12 @@
     regexp: '^([^#].*\sswap\s.*)$'
     replace: '# \1'
 
-- name: Set SELinux to permissive mode
+- name: Set SELinux to permissive mode (if available)
   shell: |
-    setenforce 0 || true
-    sed -i 's/^SELINUX=enforcing$/SELINUX=permissive/' /etc/selinux/config
+    if [ -f /etc/selinux/config ]; then
+      setenforce 0 || true
+      sed -i 's/^SELINUX=enforcing$/SELINUX=permissive/' /etc/selinux/config
+    fi
   changed_when: false
 
 - name: Load overlay and br_netfilter kernel modules

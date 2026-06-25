@@ -1,8 +1,8 @@
 ---
-- name: Add Docker CE repo pinned to CentOS 7 (Amazon Linux 2 compatible)
+- name: Add Docker CE repo (CentOS 7 - compatible with Amazon Linux 2)
   yum_repository:
     name: docker-ce-stable
-    description: Docker CE Stable
+    description: Docker CE Stable - CentOS 7 compatible with amzn2
     baseurl: https://download.docker.com/linux/centos/7/x86_64/stable
     gpgcheck: yes
     gpgkey: https://download.docker.com/linux/centos/gpg

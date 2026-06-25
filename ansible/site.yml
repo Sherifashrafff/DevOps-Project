@@ -1,4 +1,8 @@
 ---
+# Kubernetes Cluster Setup - Amazon Linux 2 Compatible
+# This playbook sets up a Kubernetes cluster on Amazon Linux 2 instances
+# For detailed migration information, see AMAZON_LINUX_2_MIGRATION.md
+
 - name: Prepare all nodes
   hosts: all
   become: yes
