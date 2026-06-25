@@ -8,14 +8,9 @@
     gpgkey: https://download.docker.com/linux/centos/gpg
     enabled: yes
 
-- name: Install container-selinux dependency for containerd
-  yum:
-    name: container-selinux
-    state: present
-
 - name: Install containerd
   yum:
-    name: containerd.io
+    name: containerd
     state: present
 
 - name: Create containerd config directory
