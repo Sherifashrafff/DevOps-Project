@@ -1,0 +1,52 @@
+pipeline {
+  agent any
+
+  options {
+    buildDiscarder(logRotator(numToKeepStr: '20'))
+    timeout(time: 15, unit: 'MINUTES')
+    disableConcurrentBuilds()
+  }
+
+  environment {
+    ECR_REGISTRY   = '390449413955.dkr.ecr.us-east-1.amazonaws.com'
+    AWS_REGION     = 'us-east-1'
+    IMAGE_TAG      = "${env.BUILD_NUMBER}"
+    FRONTEND_IMAGE = '390449413955.dkr.ecr.us-east-1.amazonaws.com/taskflow-frontend'
+  }
+
+  stages {
+
+    stage('Build') {
+      steps {
+        sh '''
+          docker build \
+            --tag ${FRONTEND_IMAGE}:${IMAGE_TAG} \
+            --tag ${FRONTEND_IMAGE}:latest \
+            ./frontend
+        '''
+      }
+    }
+
+    stage('Push to ECR') {
+      steps {
+        sh '''
+          aws ecr get-login-password --region ${AWS_REGION} \
+            | docker login --username AWS --password-stdin ${ECR_REGISTRY}
+
+          docker push ${FRONTEND_IMAGE}:${IMAGE_TAG}
+          docker push ${FRONTEND_IMAGE}:latest
+        '''
+      }
+    }
+
+  }
+
+  post {
+    success {
+      echo "Frontend CI succeeded -- ${FRONTEND_IMAGE}:${IMAGE_TAG} pushed to ECR"
+    }
+    failure {
+      echo "Frontend CI failed at stage: ${env.STAGE_NAME}"
+    }
+  }
+}
