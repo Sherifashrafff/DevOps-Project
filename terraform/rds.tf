@@ -6,28 +6,18 @@ resource "aws_db_subnet_group" "main" {
   tags = { Name = "${var.project}-rds-subnets" }
 }
 
-resource "aws_db_instance" "postgres" {
-  identifier        = "${var.project}-postgres"
-  engine            = "postgres"
-  engine_version    = var.db_engine_version
-  instance_class    = var.db_instance_class
-  allocated_storage = 20
-  storage_type      = "gp2"
+# ── PostgreSQL moved in-cluster (Kubernetes StatefulSet — see ../k8s/) ─────────
+# The managed RDS PostgreSQL ("Aurora") instance is no longer provisioned by
+# Terraform. This `removed` block drops it from Terraform state on the next
+# `apply` WITHOUT destroying it — `lifecycle { destroy = false }` leaves the
+# instance running in AWS so it can be decommissioned manually.
+#
+# After you run `terraform apply` once (which removes it from state) and have
+# manually deleted the instance in AWS, this block can be deleted too.
+removed {
+  from = aws_db_instance.postgres
 
-  db_name  = var.db_name
-  username = var.db_username
-
-  # RDS generates a strong password and stores it in Secrets Manager.
-  # No plaintext password is ever passed through Terraform state.
-  manage_master_user_password = true
-
-  db_subnet_group_name   = aws_db_subnet_group.main.name
-  vpc_security_group_ids = [aws_security_group.rds.id]
-
-  publicly_accessible = false
-  storage_encrypted   = true
-  skip_final_snapshot = true
-  deletion_protection = false
-
-  tags = { Name = "${var.project}-postgres" }
+  lifecycle {
+    destroy = false
+  }
 }

@@ -1,6 +1,6 @@
 # TaskFlow
 
-Project & task tracker. Node.js + Express backend, static HTML/JS frontend served by nginx, Aurora PostgreSQL via Knex.
+Project & task tracker. Node.js + Express backend, static HTML/JS frontend served by nginx, PostgreSQL (in-cluster Kubernetes StatefulSet) via Knex.
 
 ## Directory tree
 
@@ -81,7 +81,7 @@ All variables documented in `backend/.env.example`.
 | `DB_NAME` | * | `taskflow` | Database name |
 | `DB_USER` | * | `taskflow_user` | DB user |
 | `DB_PASSWORD` | yes | — | DB password |
-| `DB_SSL` | no | `false` | Set `true` for Aurora (validates cert chain) |
+| `DB_SSL` | no | `false` | Set `true` when connecting to a TLS-terminated DB (validates cert chain) |
 | `JWT_SECRET` | yes | — | Min 32 chars, random |
 | `JWT_EXPIRES_IN` | no | `7d` | Token lifetime |
 | `CORS_ORIGINS` | no | — | Comma-separated allowed origins |
@@ -110,11 +110,16 @@ npm run migrate:rollback
 npx knex migrate:make add_labels --knexfile knexfile.js
 ```
 
-## Aurora (production) notes
+## Database (production) notes
 
-- Set `DATABASE_URL` to the Aurora writer endpoint, or set individual `DB_*` vars.
-- Set `DB_SSL=true`. Aurora uses AWS-signed certs — the Node pg driver validates the chain automatically.
-- For read-heavy workloads, configure a second pool pointing at the Aurora reader endpoint and route `SELECT` queries there.
+PostgreSQL runs **in-cluster as a Kubernetes StatefulSet** — see [`k8s/`](k8s/). It is no
+longer a managed RDS/Aurora instance and is not provisioned by Terraform.
+
+- The backend connects via the `DB_*` vars — `DB_HOST=postgres.taskflow.svc.cluster.local`,
+  `DB_PORT=5432`, and name/user/password from the `taskflow-secrets` Kubernetes Secret.
+- `DB_SSL=false` for in-cluster traffic (pod-to-pod within the cluster network).
+- The StatefulSet uses `volumeClaimTemplates`, so its data persists across pod restarts and
+  rescheduling on a PersistentVolume (requires a default StorageClass, e.g. the EBS CSI driver).
 
 ## API routes
 

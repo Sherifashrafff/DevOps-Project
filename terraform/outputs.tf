@@ -44,18 +44,6 @@ output "ecr_frontend_url" {
   value       = aws_ecr_repository.app["frontend"].repository_url
 }
 
-# ── RDS PostgreSQL ────────────────────────────────────────────────────────────
-
-output "rds_endpoint" {
-  description = "RDS PostgreSQL endpoint"
-  value       = aws_db_instance.postgres.address
-}
-
-output "rds_port" {
-  description = "RDS PostgreSQL port"
-  value       = aws_db_instance.postgres.port
-}
-
 # ── Ansible inventory ─────────────────────────────────────────────────────────
 
 output "private_key_path" {
@@ -108,16 +96,4 @@ output "ansible_inventory" {
     ansible_ssh_private_key_file=~/.ssh/${var.project}.pem
     ansible_ssh_common_args='-o ProxyJump=ec2-user@${aws_instance.bastion.public_ip}'
   EOT
-}
-
-# ── Secrets Manager ───────────────────────────────────────────────────────────
-
-output "db_secret_arn" {
-  description = "ARN of the Secrets Manager secret holding the RDS master credentials"
-  value       = aws_db_instance.postgres.master_user_secret[0].secret_arn
-}
-
-output "db_secret_fetch_cmd" {
-  description = "AWS CLI command to retrieve the DB credentials"
-  value       = "aws secretsmanager get-secret-value --secret-id ${aws_db_instance.postgres.master_user_secret[0].secret_arn} --region ${var.region} --query SecretString --output text"
 }

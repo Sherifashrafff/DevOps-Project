@@ -28,20 +28,7 @@ resource "aws_iam_instance_profile" "ec2_node" {
   role = aws_iam_role.ec2_node.name
 }
 
-# Allows backend pods to call GetSecretValue on the Aurora-managed secret
-resource "aws_iam_role_policy" "read_db_secret" {
-  name = "${var.project}-read-db-secret"
-  role = aws_iam_role.ec2_node.id
-
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [{
-      Effect = "Allow"
-      Action = [
-        "secretsmanager:GetSecretValue",
-        "secretsmanager:DescribeSecret"
-      ]
-      Resource = aws_db_instance.postgres.master_user_secret[0].secret_arn
-    }]
-  })
-}
+# NOTE: the "read_db_secret" inline policy was removed alongside the RDS
+# instance — the database now runs in-cluster (Kubernetes StatefulSet) with
+# credentials supplied via a Kubernetes Secret, so pods no longer read the
+# RDS master credentials from Secrets Manager.
