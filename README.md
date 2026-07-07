@@ -112,8 +112,8 @@ npx knex migrate:make add_labels --knexfile knexfile.js
 
 ## Database (production) notes
 
-PostgreSQL runs **in-cluster as a Kubernetes StatefulSet** — see [`k8s/`](k8s/). It is no
-longer a managed RDS/Aurora instance and is not provisioned by Terraform.
+PostgreSQL runs **in-cluster as a Kubernetes StatefulSet** — see [`k8s/`](k8s/). It is not
+provisioned by Terraform.
 
 - The backend connects via the `DB_*` vars — `DB_HOST=postgres.taskflow.svc.cluster.local`,
   `DB_PORT=5432`, and name/user/password from the `taskflow-secrets` Kubernetes Secret.

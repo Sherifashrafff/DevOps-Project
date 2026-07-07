@@ -15,7 +15,7 @@ function assertEnv() {
 }
 
 // Returns a knex-compatible connection object.
-// DATABASE_URL takes precedence over individual vars (makes Aurora easy: one env var).
+// DATABASE_URL takes precedence over individual vars (one env var for the whole DSN).
 function dbConfig() {
   if (process.env.DATABASE_URL) {
     return {

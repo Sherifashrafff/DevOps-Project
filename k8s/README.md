@@ -1,7 +1,7 @@
 # TaskFlow Kubernetes manifests
 
-PostgreSQL runs **in-cluster as a StatefulSet** (it used to be managed RDS/"Aurora").
-The database is no longer provisioned by Terraform — see [`../terraform/rds.tf`](../terraform/rds.tf).
+PostgreSQL runs **in-cluster as a StatefulSet**. The database is not provisioned by
+Terraform — it is defined entirely by the manifests in this directory.
 
 ## Manifests
 

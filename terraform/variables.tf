@@ -69,29 +69,3 @@ variable "frontend_nodeport" {
   type        = number
   default     = 30080
 }
-
-# ── RDS PostgreSQL ────────────────────────────────────────────────────────────
-
-variable "db_name" {
-  description = "Database name"
-  type        = string
-  default     = "taskflow"
-}
-
-variable "db_username" {
-  description = "RDS master username"
-  type        = string
-  default     = "taskflow_user"
-}
-
-variable "db_instance_class" {
-  description = "RDS instance class (db.t3.micro is free-tier eligible)"
-  type        = string
-  default     = "db.t3.micro"
-}
-
-variable "db_engine_version" {
-  description = "PostgreSQL engine version"
-  type        = string
-  default     = "15"
-}

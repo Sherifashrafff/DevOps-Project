@@ -80,36 +80,3 @@ resource "aws_security_group_rule" "worker_from_control_plane" {
   security_group_id        = aws_security_group.worker.id
   source_security_group_id = aws_security_group.control_plane.id
 }
-
-# ── Aurora PostgreSQL ─────────────────────────────────────────────────────────
-
-resource "aws_security_group" "rds" {
-  name        = "${var.project}-rds"
-  description = "Aurora PostgreSQL - reachable from k8s nodes only"
-  vpc_id      = aws_vpc.main.id
-
-  ingress {
-    description     = "PostgreSQL from control plane"
-    from_port       = 5432
-    to_port         = 5432
-    protocol        = "tcp"
-    security_groups = [aws_security_group.control_plane.id]
-  }
-
-  ingress {
-    description     = "PostgreSQL from worker nodes"
-    from_port       = 5432
-    to_port         = 5432
-    protocol        = "tcp"
-    security_groups = [aws_security_group.worker.id]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = { Name = "${var.project}-rds" }
-}

@@ -23,7 +23,7 @@ resource "aws_subnet" "public" {
   tags = { Name = "${var.project}-public-${count.index + 1}" }
 }
 
-# Two private subnets - Aurora requires a subnet group spanning at least 2 AZs
+# Two private subnets spanning separate AZs for internal-only resources
 resource "aws_subnet" "private" {
   count             = 2
   vpc_id            = aws_vpc.main.id

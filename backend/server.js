@@ -25,7 +25,7 @@ async function shutdown(signal) {
     }
   });
 
-  // Hard kill if not done within 10 s (prevents hanging pod on Aurora cold start)
+  // Hard kill if not done within 10 s (prevents a pod hanging on shutdown)
   setTimeout(() => {
     console.error("[server] Forced exit after timeout");
     process.exit(1);
