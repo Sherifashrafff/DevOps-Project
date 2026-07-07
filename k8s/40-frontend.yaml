@@ -36,7 +36,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: 390449413955.dkr.ecr.us-east-1.amazonaws.com/taskflow-frontend:latest
+          image: 390449413955.dkr.ecr.us-east-1.amazonaws.com/taskflow-frontend:5
           ports:
             - name: http
               containerPort: 8080
