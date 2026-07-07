@@ -53,7 +53,7 @@ spec:
     spec:
       initContainers:
         - name: migrate
-          image: 390449413955.dkr.ecr.us-east-1.amazonaws.com/taskflow-backend:latest
+          image: 390449413955.dkr.ecr.us-east-1.amazonaws.com/taskflow-backend:4
           command: ["npm", "run", "migrate"]
           envFrom:
             - configMapRef:
