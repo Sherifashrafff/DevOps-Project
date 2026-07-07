@@ -7,11 +7,12 @@ Terraform — it is defined entirely by the manifests in this directory.
 
 | File | Purpose |
 |------|---------|
-| `00-namespace.yaml` | `taskflow` namespace |
-| `10-secrets.yaml`   | DB credentials + `JWT_SECRET` (**edit before applying**) |
-| `20-postgres.yaml`  | Postgres headless Service + StatefulSet (`volumeClaimTemplates`, 20Gi PVC) |
-| `30-backend.yaml`   | Backend ConfigMap + Service + Deployment (migrations run in an initContainer) |
-| `40-frontend.yaml`  | Frontend Deployment + NodePort Service on `30080` (ALB target) |
+| `00-namespace.yaml`    | `taskflow` namespace |
+| `05-storageclass.yaml` | `local-path` StorageClass (default) backing the Postgres PVC |
+| `10-secrets.yaml`      | DB credentials + `JWT_SECRET` (**edit before applying**) |
+| `20-postgres.yaml`     | Postgres headless Service + StatefulSet (`volumeClaimTemplates`, 5Gi PVC) |
+| `30-backend.yaml`      | Backend ConfigMap + Service + Deployment (migrations run in an initContainer) |
+| `40-frontend.yaml`     | Frontend Deployment + NodePort Service on `30080` (ALB target) |
 
 ## Apply
 
@@ -31,12 +32,25 @@ The backend connects using the `DB_*` env vars (see `backend/src/config/env.js`)
 `DB_HOST=postgres.taskflow.svc.cluster.local`, `DB_PORT=5432`, with the name/user/password
 sourced from the `taskflow-secrets` Secret. No AWS Secrets Manager lookup is involved anymore.
 
-## Storage note
+## Storage
 
-`volumeClaimTemplates` requires a working default StorageClass (dynamic provisioning).
-On this self-managed cluster, ensure a provisioner (e.g. EBS CSI driver) and a default
-StorageClass exist, otherwise the PVC will stay `Pending`. Check with:
+The Postgres PVC uses the `local-path` StorageClass in `05-storageclass.yaml`
+(provisioner `rancher.io/local-path`), which stores data on the worker node's local disk.
+
+That StorageClass only works if the **local-path-provisioner controller** is running in
+the cluster. Install it once (it is not part of a bare kubeadm cluster):
 
 ```bash
-kubectl get storageclass
+kubectl apply -f https://raw.githubusercontent.com/rancher/local-path-provisioner/v0.0.30/deploy/local-path-storage.yaml
 ```
+
+The upstream bundle also ships its own `local-path` StorageClass; ours here just marks it
+the cluster default. Verify with:
+
+```bash
+kubectl get storageclass          # local-path should be listed as (default)
+kubectl -n taskflow get pvc       # data-postgres-0 should be Bound, not Pending
+```
+
+Note: `local-path` is node-local — the DB data lives on whichever node the pod runs on and
+is lost if that node is destroyed. Use a networked provisioner (e.g. EBS CSI) for durability.
